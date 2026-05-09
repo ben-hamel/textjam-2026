@@ -169,9 +169,21 @@ fn adjustParam(state: *audio.SharedState, sel: usize, delta: f32) void {
     ptr.store(std.math.clamp(old + delta, 0.0, 1.0), .release);
 }
 
-pub fn main() !void {
+pub fn main(init: std.process.Init) !void {
+    const arena = init.arena.allocator();
+    const args = try init.minimal.args.toSlice(arena);
+
+    var file_path: ?[*:0]const u8 = null;
+    var i: usize = 1;
+    while (i < args.len) : (i += 1) {
+        if (std.mem.eql(u8, args[i], "--file") and i + 1 < args.len) {
+            file_path = args[i + 1].ptr;
+            i += 1;
+        }
+    }
+
     var state = audio.SharedState{};
-    var engine = try audio.AudioEngine.init(&state);
+    var engine = try audio.AudioEngine.init(&state, file_path);
     defer engine.deinit();
 
     enableRawMode();
@@ -186,7 +198,10 @@ pub fn main() !void {
 
         const key = pollKey(50) orelse continue;
 
-        if (key == 'q') break;
+        if (key == 'q') {
+            state.running.store(false, .release);
+            break;
+        }
 
         if (key == ' ') {
             const cur = state.bypassed.load(.acquire);
