@@ -1,0 +1,11 @@
+[project]
+name = "python-tui-guitar-pedals"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "numpy>=2.4.4",
+    "sounddevice>=0.5.5",
+    "textual>=8.2.5",
+]
